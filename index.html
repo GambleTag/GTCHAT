@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Public Chat Room</title>
+  <!-- Include Firebase SDK scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #chat-window { height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+    #message-input { width: 80%; padding: 10px; }
+    #send-button { padding: 10px; }
+  </style>
+</head>
+<body>
+  <div id="chat-window"></div>
+  <input type="text" id="message-input" placeholder="Type your message">
+  <button id="send-button">Send</button>
+
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3_1iQ61sJgvul1jCr0240VG_0hW956KY",
+      authDomain: "gambletag-chat.firebaseapp.com",
+      projectId: "gambletag-chat",
+      storageBucket: "gambletag-chat.appspot.com",
+      messagingSenderId: "750155330018",
+      appId: "1:750155330018:web:6833fd3b0548cbdd2e49bb",
+      measurementId: "G-0H2YS2SN7R"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+    
+    const db = app.firestore();
+
+    // Load chat messages
+    db.collection("messages").orderBy("timestamp").onSnapshot((snapshot) => {
+      const chatWindow = document.getElementById("chat-window");
+      chatWindow.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const message = doc.data();
+        const messageElement = document.createElement("div");
+        messageElement.textContent = message.text;
+        chatWindow.appendChild(messageElement);
+      });
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
+
+    // Send a new message
+    document.getElementById("send-button").addEventListener("click", () => {
+      const input = document.getElementById("message-input");
+      if (input.value.trim() !== "") {
+        db.collection("messages").add({
+          text: input.value,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        input.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
